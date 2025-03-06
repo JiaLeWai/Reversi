@@ -393,7 +393,7 @@ namespace ConsoleApp1
 
         void checkAllNextMoves(int[,] chessBoard, bool turn)
         {
-           // List<(int, int)> validMoves = new List<(int, int)>();
+            List<(int, int)> validMoves = new List<(int, int)>();
         }
     }
 
