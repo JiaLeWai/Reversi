@@ -1,3 +1,7 @@
+
+//#define DEBUG
+#undef DEBUG
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleApp1
 {
-    delegate int chessBoard();
+    //delegate int chessBoard();
     class Program
     {
         static void Main(string[] args)
@@ -92,6 +96,7 @@ namespace ConsoleApp1
 
             while (moveCount <= totalMove)
             {
+
                 Console.WriteLine("[Row][Column]: ");
                 string moveInput = Console.ReadLine();
                 int rowMove = moveInput[0] - '0' - 1;
@@ -101,6 +106,8 @@ namespace ConsoleApp1
                 if ((chessBoard[rowMove, colMove] == 1) || chessBoard[rowMove, colMove] == 2)
                 {
                     Console.WriteLine("Invalid Move, Please type a new position!");
+                    turn = !turn;
+                    moveCount--;
                     continue;
                 }
                 chessBoard = chessBoardRunOne(chessBoard, rowMove, colMove, turn);
@@ -146,10 +153,10 @@ namespace ConsoleApp1
             int nearestPointAX = -1, nearestPointAY = -1, nearestPointBX = -1, nearestPointBY = -1;
             if (condition == 1) // X Axis
             {
-                int j = colMove;
+                int j = colMove-1; //check surroundings, exclude itself
                 for(; j >=0; j--)
                 {
-                    if ((chessBoard[rowMove, j] == 0) && (j != colMove)) break;
+                    if ((chessBoard[rowMove, j] == 0)) break;
                     if ((chessBoard[rowMove, j] == chessType))
                     {
                         nearestPointA = j;
@@ -157,10 +164,10 @@ namespace ConsoleApp1
                     }
                 }
 
-                j = colMove;
+                j = colMove+1;
                 for (; j<size; j++)
                 {
-                    if ((chessBoard[rowMove, j] == 0) && (j != colMove)) break;
+                    if ((chessBoard[rowMove, j] == 0)) break;
                     if ((chessBoard[rowMove, j] == chessType))
                     {
                         nearestPointB = j;
@@ -184,7 +191,7 @@ namespace ConsoleApp1
                         chessBoard[rowMove, j] = chessType;
                     }
                 }
-                else
+                else if ((nearestPointA != -1) && (nearestPointB != -1))
                 {
                     j = nearestPointA + 1;
                     for (; j < nearestPointB; j++)
@@ -196,7 +203,7 @@ namespace ConsoleApp1
 
             else if (condition == 2) // Y Axis
             {
-                int j = rowMove;
+                int j = rowMove-1;
                 for (; j >= 0; j--)
                 {
                     if ((chessBoard[j, colMove] == 0) && (j != rowMove)) break;
@@ -207,7 +214,7 @@ namespace ConsoleApp1
                     }
                 }
 
-                j = rowMove;
+                j = rowMove+1;
                 for (; j < size; j++)
                 {
                     if ((chessBoard[j, colMove] == 0) && (j != rowMove)) break;
@@ -250,7 +257,7 @@ namespace ConsoleApp1
                         chessBoard[j, colMove] = chessType;
                     }
                 }
-                else
+                else if ((nearestPointA != -1) && (nearestPointB != -1))
                 {
                     j = nearestPointA + 1;
                     for (; j < nearestPointB; j++)
@@ -262,13 +269,13 @@ namespace ConsoleApp1
 
             else if (condition == 3) //Axis \
             {
-                int i = rowMove, j = colMove;
+                int i = rowMove-1, j = colMove-1;
                 //  bool pinNearestA = false;
 
 
                 for (; i >= 0 && j >= 0; i--, j--)
                 {
-                    if ((chessBoard[i, j] == 0) && (i != rowMove) && j != colMove) break;
+                    if ((chessBoard[i, j] == 0)) break;
                     if ((chessBoard[i, j] == chessType) && (i<rowMove) && (j<colMove))
                     {
                         nearestPointAX = i;
@@ -277,10 +284,10 @@ namespace ConsoleApp1
                     }
                 }
 
-                i = rowMove; j = colMove; //Pin at the selected point again
+                i = rowMove+1; j = colMove+1; //Pin at the selected point again
                 for (; i < size && j < size; i++, j++)
                 {
-                    if ((chessBoard[i, j] == 0) && (i != rowMove) && j != colMove) break;
+                    if ((chessBoard[i, j] == 0)) break;
                     if ((chessBoard[i, j] == chessType) && (i > rowMove) && (j > colMove))
                     {
                         nearestPointBX = i;
@@ -305,7 +312,7 @@ namespace ConsoleApp1
                         chessBoard[i, j] = chessType;
                     }
                 }
-                else
+                else if ((nearestPointAX != -1) && (nearestPointBX != -1))
                 {
                     i = nearestPointAX + 1; j = nearestPointAY + 1;
                     for (; i < nearestPointBX && j<nearestPointBY; i++, j++)
@@ -317,10 +324,7 @@ namespace ConsoleApp1
 
             else if (condition == 4) //Axis \
             {
-                int i = rowMove, j = colMove;
-                //  bool pinNearestA = false;
-
-
+                int i = rowMove+1, j = colMove-1;
                 for (; i < size && j >= 0; i++, j--)
                 {
                     if ((chessBoard[i, j] == 0) && (i != rowMove) && j != colMove) break;
@@ -332,7 +336,7 @@ namespace ConsoleApp1
                     }
                 }
 
-                i = rowMove; j = colMove; //Pin at the selected point again
+                i = rowMove-1; j = colMove+1; //Pin at the selected point again
                 for (; i >=0 && j < size; i--, j++)
                 {
                     if ((chessBoard[i, j] == 0) && (i != rowMove) && j != colMove) break;
@@ -360,7 +364,7 @@ namespace ConsoleApp1
                         chessBoard[i, j] = chessType;
                     }
                 }
-                else
+                else if ((nearestPointAX != -1) && (nearestPointBX != -1))
                 {
                     i = nearestPointAX - 1; j = nearestPointAY + 1;
                     for (; i > nearestPointBX && j < nearestPointBY; i--, j++)
@@ -370,9 +374,26 @@ namespace ConsoleApp1
                 }
             }
 
+#if DEBUG
+            Console.WriteLine("\nCondition:" + condition);
+            Console.WriteLine("ChessType:" + chessType);
+            Console.WriteLine("A:" + nearestPointA);
+            Console.WriteLine("B:" + nearestPointB);
+            Console.WriteLine("AX:" + nearestPointAX);
+            Console.WriteLine("AY:" + nearestPointAY);
+            Console.WriteLine("BX:" + nearestPointBX);
+            Console.WriteLine("BY:" + nearestPointBY);
 
-
+            displayChessBoard(chessBoard);    
+            
+#else
+#endif
             return chessBoard;
+        }
+
+        void checkAllNextMoves(int[,] chessBoard, bool turn)
+        {
+           // List<(int, int)> validMoves = new List<(int, int)>();
         }
     }
 
