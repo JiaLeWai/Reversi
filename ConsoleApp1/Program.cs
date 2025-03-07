@@ -1,6 +1,8 @@
 
 //#define DEBUG
 #undef DEBUG
+#define DEBUGVALIDMOVE
+//#undef DEBUGVALIDMOVE
 
 using System;
 using System.Collections.Generic;
@@ -21,15 +23,9 @@ namespace ConsoleApp1
 
             int size = 8; //chessBoard size
 
-
-
             int[,] chessBoard = chessBoardInitialise(size);
 
-            displayChessBoard(chessBoard);
-
             playChess(chessBoard);
-
-
 
             // Console.ReadKey();
 
@@ -62,10 +58,12 @@ namespace ConsoleApp1
             return chessBoard;
         }
 
-        static void displayChessBoard(int[,] chessBoard)
+        static void displayChessBoard(int[,] chessBoard, bool turn)
         {
             int row = chessBoard.GetLength(0);
             int column = chessBoard.GetLength(1);
+
+            Console.WriteLine("\nTurn: " + ((turn == true) ? "White" : "Black"));
             for (int i = 0; i < row; i++)
             {
                 if (i == 0)
@@ -93,25 +91,30 @@ namespace ConsoleApp1
             int totalMove = chessBoard.GetLength(0) * chessBoard.GetLength(1); //totalMove
             int moveCount = 4; // 4 chess is aldy placed in the board
             bool turn = false; //false = black, true = white
+            List<(int, int)> validMove = new List<(int, int)>();
 
             while (moveCount <= totalMove)
             {
+                validMove = checkAllNextMoves(chessBoard, turn);
+                displayChessBoard(chessBoard, turn);
 
+                Console.WriteLine("ValidMove Counts: " + validMove.Count);
                 Console.WriteLine("[Row][Column]: ");
                 string moveInput = Console.ReadLine();
                 int rowMove = moveInput[0] - '0' - 1;
                 int colMove = moveInput[1] - '0' - 1;
 
 
-                if ((chessBoard[rowMove, colMove] == 1) || chessBoard[rowMove, colMove] == 2)
+                if (!validMove.Contains((rowMove, colMove)))
                 {
                     Console.WriteLine("Invalid Move, Please type a new position!");
-                    turn = !turn;
-                    moveCount--;
+                    //turn = !turn;
+                    //moveCount--;
                     continue;
                 }
                 chessBoard = chessBoardRunOne(chessBoard, rowMove, colMove, turn);
                 turn = !turn;
+                moveCount++;
             }
         }
 
@@ -119,14 +122,6 @@ namespace ConsoleApp1
         {
             int chessType = 0;
             if (turn) { chessType = 1; } else { chessType = 2; }
-
-            // X axis
-            //int[,] boardX = (int[,])chessBoard.Clone();
-            //boardX = checkAxis(chessBoard, rowMove, colMove, chessType, 1);
-
-            //// Y axis 
-            //int[,] boardY = (int[,])chessBoard.Clone();
-            //boardY = checkAxis(chessBoard, rowMove, colMove, chessType, 2);
 
             // X axis
             chessBoard = checkAxis(chessBoard, rowMove, colMove, chessType, 1);
@@ -140,9 +135,6 @@ namespace ConsoleApp1
             // / axis
             chessBoard = checkAxis(chessBoard, rowMove, colMove, chessType, 4);
 
-
-
-            displayChessBoard(chessBoard);
             return chessBoard;
         }
 
@@ -391,9 +383,61 @@ namespace ConsoleApp1
             return chessBoard;
         }
 
-        void checkAllNextMoves(int[,] chessBoard, bool turn)
+        static List<(int,int)> checkAllNextMoves(int[,] chessBoard, bool turn)
         {
             List<(int, int)> validMoves = new List<(int, int)>();
+            int size = chessBoard.GetLength(0);
+            int i = 0, j = 0;
+
+            for(; i<size; i++)
+            {
+                j = 0;
+                for (; j<size; j++)
+                {
+                    if (chessBoard[i, j] == 0)
+                    {
+                        if (isValidMove(chessBoard, turn, i, j))
+                        {
+                            validMoves.Add((i, j));
+                        }
+                    }
+                }
+            }
+
+#if DEBUGVALIDMOVE
+            Console.WriteLine("\nValidMoves: ");
+            foreach (var moves in validMoves)
+            {
+                Console.WriteLine("" + moves);
+            }
+#else
+#endif
+            return validMoves;
+        }
+
+        static bool isValidMove(int[,] chessBoard, bool turn, int row, int col)
+        {
+            int[,] directions = { { 0, -1 }, { 0, 1}, { -1, 0 }, { 1, 0 }, { -1, -1 }, { 1, 1 }, { 1, -1 }, { -1, 1 }}; //← → ↑ ↓ ↖ ↘ ↙ ↗
+            int enemy = (turn == true) ? 2 : 1;
+            int player = (turn == true) ? 1 : 2;
+            int size = chessBoard.GetLength(0);
+
+            for (int i = 0; i<directions.GetLength(0); i++)
+            {
+                int r = row + directions[i, 0], c = col + directions[i, 1];
+                bool foundEnemy = false;
+
+                while (r >= 0 && r < size && c >= 0 && c < size && chessBoard[r, c] == enemy)
+                {
+                    foundEnemy = true;
+                    r += directions[i, 0];
+                    c += directions[i, 1];
+                }
+
+                if (r >= 0 && r < size && c >= 0 && c < size && chessBoard[r, c] == player && foundEnemy == true) return true;
+
+            }
+            return false;
         }
     }
 
