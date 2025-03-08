@@ -27,6 +27,8 @@ namespace ConsoleApp1
 
             playChess(chessBoard);
 
+            //checkResult(chessBoard);
+
             // Console.ReadKey();
 
 
@@ -91,11 +93,24 @@ namespace ConsoleApp1
             int totalMove = chessBoard.GetLength(0) * chessBoard.GetLength(1); //totalMove
             int moveCount = 4; // 4 chess is aldy placed in the board
             bool turn = false; //false = black, true = white
+            int noMoveCountNum = -1;
             List<(int, int)> validMove = new List<(int, int)>();
 
             while (moveCount <= totalMove)
             {
                 validMove = checkAllNextMoves(chessBoard, turn);
+                if (validMove.Count == 0)
+                {
+                    if (moveCount == noMoveCountNum)
+                    {
+                        Console.WriteLine("\nGame Ends!");
+                        break;
+                    }
+                    turn = !turn;
+                    noMoveCountNum = moveCount;
+                    continue;
+                }
+
                 displayChessBoard(chessBoard, turn);
 
                 Console.WriteLine("ValidMove Counts: " + validMove.Count);
@@ -438,6 +453,19 @@ namespace ConsoleApp1
 
             }
             return false;
+        }
+
+        static void checkResult(int[,] chessBoard)
+        {
+
+            int size = chessBoard.GetLength(0);
+            for (int i = 0; i<size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+
+                }
+            }
         }
     }
 
