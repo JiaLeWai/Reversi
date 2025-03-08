@@ -98,6 +98,8 @@ namespace ConsoleApp1
 
             while (moveCount <= totalMove)
             {
+                checkTotalChess(chessBoard);
+
                 validMove = checkAllNextMoves(chessBoard, turn);
                 if (validMove.Count == 0)
                 {
@@ -455,17 +457,22 @@ namespace ConsoleApp1
             return false;
         }
 
-        static void checkResult(int[,] chessBoard)
+        static void checkTotalChess(int[,] chessBoard)
         {
-
+            int blackChess = 0, whiteChess = 0;
             int size = chessBoard.GetLength(0);
             for (int i = 0; i<size; i++)
             {
                 for (int j = 0; j < size; j++)
                 {
-
+                    if (chessBoard[i, j] == 0) continue;
+                    else
+                    {
+                        _ = ((chessBoard[i, j] == 1) ? whiteChess++ : blackChess++);
+                    }
                 }
             }
+            Console.WriteLine("\nBlack: " + blackChess + "\nWhite: " + whiteChess);
         }
     }
 
