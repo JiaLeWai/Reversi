@@ -21,15 +21,19 @@ namespace ConsoleApp1
             // The code provided will print ‘Hello World’ to the console.
             // Press Ctrl+F5 (or go to Debug > Start Without Debugging) to run your app.
 
+            
+
             int size = 8; //chessBoard size
 
             int[,] chessBoard = chessBoardInitialise(size);
 
             playChess(chessBoard);
 
-            //checkResult(chessBoard);
+            checkTotalChess(chessBoard, true);
 
-            // Console.ReadKey();
+            Console.ReadKey(true);
+
+
 
 
             // Go to http://aka.ms/dotnet-get-started-console to continue learning how to build a console app! 
@@ -98,16 +102,18 @@ namespace ConsoleApp1
 
             while (moveCount <= totalMove)
             {
-                checkTotalChess(chessBoard);
+                checkTotalChess(chessBoard, false);
 
                 validMove = checkAllNextMoves(chessBoard, turn);
                 if (validMove.Count == 0)
                 {
                     if (moveCount == noMoveCountNum)
                     {
-                        Console.WriteLine("\nGame Ends!");
+                        Console.WriteLine("\nBoth players has no valid moves. Game Ends!");
                         break;
                     }
+
+                    Console.WriteLine("\n" + ((turn == true) ? "White Chess" : "Black Chess") + " has not valid moves. Switching turn!");
                     turn = !turn;
                     noMoveCountNum = moveCount;
                     continue;
@@ -125,14 +131,14 @@ namespace ConsoleApp1
                 if (!validMove.Contains((rowMove, colMove)))
                 {
                     Console.WriteLine("Invalid Move, Please type a new position!");
-                    //turn = !turn;
-                    //moveCount--;
                     continue;
                 }
                 chessBoard = chessBoardRunOne(chessBoard, rowMove, colMove, turn);
                 turn = !turn;
                 moveCount++;
             }
+
+            Console.WriteLine("\nGame Ends!");
         }
 
         static int[,] chessBoardRunOne(int[,] chessBoard, int rowMove, int colMove, bool turn)
@@ -415,7 +421,7 @@ namespace ConsoleApp1
                     {
                         if (isValidMove(chessBoard, turn, i, j))
                         {
-                            validMoves.Add((i, j));
+                            validMoves.Add((i+1, j+1));
                         }
                     }
                 }
@@ -457,7 +463,7 @@ namespace ConsoleApp1
             return false;
         }
 
-        static void checkTotalChess(int[,] chessBoard)
+        static void checkTotalChess(int[,] chessBoard, bool gameEnd)
         {
             int blackChess = 0, whiteChess = 0;
             int size = chessBoard.GetLength(0);
@@ -473,6 +479,13 @@ namespace ConsoleApp1
                 }
             }
             Console.WriteLine("\nBlack: " + blackChess + "\nWhite: " + whiteChess);
+
+            if (gameEnd)
+            {
+                if (blackChess > whiteChess) Console.WriteLine("Black wins");
+                else if (blackChess < whiteChess) Console.WriteLine("White wins");
+                else Console.WriteLine("Fair Game");
+            }
         }
     }
 
