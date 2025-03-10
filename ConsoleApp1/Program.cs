@@ -129,13 +129,20 @@ namespace ConsoleApp1
                 Console.WriteLine("[Row][Column]: ");
                 string moveInput = Console.ReadLine();
 
-                //if( moveInput.Length == 1 && moveInput == "9") // undo one move
-                //{
-                //    chessBoard = chessBoardRound.LastOrDefault().chessBoard;
-                //    turn = chessBoardRound.LastOrDefault().turn;
-                //    moveCount--;
-                //    continue;
-                //}
+                if (moveInput.Length == 1 && moveInput == "9") // undo one move
+                {
+                    foreach(var moves in chessBoardRound)
+                    {
+                        Console.WriteLine(moves);
+                    }
+
+                    chessBoard = chessBoardRound[chessBoardRound.Count-2].chessBoard; 
+                    turn = !chessBoardRound[chessBoardRound.Count - 2].turn;
+
+                    chessBoardRound.RemoveAt(chessBoardRound.Count - 1); //delete the last round of game
+                    moveCount--;
+                    continue;
+                }
 
                 int rowMove = moveInput[0] - '0' - 1;
                 int colMove = moveInput[1] - '0' - 1;
@@ -147,7 +154,7 @@ namespace ConsoleApp1
                     continue;
                 }
                 chessBoard = chessBoardRunOne(chessBoard, rowMove, colMove, turn);
-                chessBoardRound.Add((chessBoard, turn));
+                chessBoardRound.Add((chessBoard, !turn));
                 turn = !turn;
                 moveCount++;
             }
