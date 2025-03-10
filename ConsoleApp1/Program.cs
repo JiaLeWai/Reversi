@@ -99,6 +99,10 @@ namespace ConsoleApp1
             bool turn = false; //false = black, true = white
             int noMoveCountNum = -1;
             List<(int, int)> validMove = new List<(int, int)>();
+            List<(int[,] chessBoard, bool turn)> chessBoardRound = new List<(int[,], bool)>
+            {
+                (chessBoard, turn) //add the initial chessboard to list
+            };
 
             while (moveCount <= totalMove)
             {
@@ -124,6 +128,15 @@ namespace ConsoleApp1
                 Console.WriteLine("ValidMove Counts: " + validMove.Count);
                 Console.WriteLine("[Row][Column]: ");
                 string moveInput = Console.ReadLine();
+
+                //if( moveInput.Length == 1 && moveInput == "9") // undo one move
+                //{
+                //    chessBoard = chessBoardRound.LastOrDefault().chessBoard;
+                //    turn = chessBoardRound.LastOrDefault().turn;
+                //    moveCount--;
+                //    continue;
+                //}
+
                 int rowMove = moveInput[0] - '0' - 1;
                 int colMove = moveInput[1] - '0' - 1;
 
@@ -134,6 +147,7 @@ namespace ConsoleApp1
                     continue;
                 }
                 chessBoard = chessBoardRunOne(chessBoard, rowMove, colMove, turn);
+                chessBoardRound.Add((chessBoard, turn));
                 turn = !turn;
                 moveCount++;
             }
@@ -421,7 +435,7 @@ namespace ConsoleApp1
                     {
                         if (isValidMove(chessBoard, turn, i, j))
                         {
-                            validMoves.Add((i+1, j+1));
+                            validMoves.Add((i, j));
                         }
                     }
                 }
@@ -431,7 +445,7 @@ namespace ConsoleApp1
             Console.WriteLine("\nValidMoves: ");
             foreach (var moves in validMoves)
             {
-                Console.WriteLine("" + moves);
+                Console.WriteLine("(" + (moves.Item1+1) + ", " + (moves.Item2 + 1) + ")");
             }
 #else
 #endif
