@@ -94,14 +94,15 @@ namespace ConsoleApp1
 
         static void playChess(int[,] chessBoard)
         {
-            int totalMove = chessBoard.GetLength(0) * chessBoard.GetLength(1); //totalMove
+            int size = chessBoard.GetLength(0);
+            int totalMove = size*size; //totalMove
             int moveCount = 4; // 4 chess is aldy placed in the board
             bool turn = false; //false = black, true = white
             int noMoveCountNum = -1;
             List<(int, int)> validMove = new List<(int, int)>();
             List<(int[,] chessBoard, bool turn)> chessBoardRound = new List<(int[,], bool)>
             {
-                (chessBoard, turn) //add the initial chessboard to list
+                (deepCopyBoard(chessBoard), turn) //add the initial chessboard to list
             };
 
             while (moveCount <= totalMove)
@@ -129,34 +130,41 @@ namespace ConsoleApp1
                 Console.WriteLine("[Row][Column]: ");
                 string moveInput = Console.ReadLine();
 
-                if (moveInput.Length == 1 && moveInput == "9") // undo one move
+                if (moveInput.Length == 1 && moveInput == "9" && chessBoardRound.Count>1) // undo one move
                 {
-                    foreach(var moves in chessBoardRound)
-                    {
-                        Console.WriteLine(moves);
-                    }
-
-                    chessBoard = chessBoardRound[chessBoardRound.Count-2].chessBoard; 
-                    turn = !chessBoardRound[chessBoardRound.Count - 2].turn;
-
-                    chessBoardRound.RemoveAt(chessBoardRound.Count - 1); //delete the last round of game
+                    (chessBoard, turn) = undoMove(chessBoardRound);
                     moveCount--;
                     continue;
                 }
-
-                int rowMove = moveInput[0] - '0' - 1;
-                int colMove = moveInput[1] - '0' - 1;
-
-
-                if (!validMove.Contains((rowMove, colMove)))
+                else if (moveInput.Length == 2)
                 {
-                    Console.WriteLine("Invalid Move, Please type a new position!");
-                    continue;
+                    int rowMove = moveInput[0] - '0' - 1;
+                    int colMove = moveInput[1] - '0' - 1;
+
+                    if (rowMove > 0 && rowMove < 9 && colMove > 0 && colMove < 9) //check the range of the input
+                    {
+                        if (!validMove.Contains((rowMove, colMove))) //check if the move is valid
+                        {
+                            Console.WriteLine("Invalid Move, Please type a new position!");
+                            continue;
+                        }
+
+                        chessBoard = chessBoardRunOne(chessBoard, rowMove, colMove, turn);
+                        chessBoardRound.Add((deepCopyBoard(chessBoard), !turn));
+                        turn = !turn;
+                        moveCount++;
+                    }
+                    else 
+                    { 
+                        Console.WriteLine("Invalid Move, Please type a new position!");
+                        continue;
+                    }
                 }
-                chessBoard = chessBoardRunOne(chessBoard, rowMove, colMove, turn);
-                chessBoardRound.Add((chessBoard, !turn));
-                turn = !turn;
-                moveCount++;
+                else //input is not valid
+                { 
+                    Console.WriteLine("Invalid Move, Please make sure the input is valid!");
+                    continue;
+                } 
             }
 
             Console.WriteLine("\nGame Ends!");
@@ -260,22 +268,6 @@ namespace ConsoleApp1
                         break;
                     }
                 }
-
-
-                //for (; j < size; j++)
-                //{
-
-                //    if ((chessBoard[j, colMove] == chessType) && (j < rowMove))
-                //    {
-                //        nearestPointA = j;
-                //    }
-                //    else if ((chessBoard[j, colMove] == chessType) && (j > rowMove))
-                //    {
-                //        nearestPointB = j;
-                //        break; //find the nearest PointB
-
-                //    }
-                //}
 
                 if ((nearestPointA == -1) && (nearestPointB != -1))
                 {
@@ -508,6 +500,29 @@ namespace ConsoleApp1
                 else Console.WriteLine("Fair Game");
             }
         }
+
+        static int[,] deepCopyBoard (int[,]chessBoard)
+        {
+            int size = chessBoard.GetLength(0);
+            int [,] copy = new int[size, size];
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    copy[i, j] = chessBoard[i, j];
+                }
+            }
+            return copy;
+        }
+
+
+        static (int[,], bool) undoMove(List<(int[,] chessBoard, bool turn)> chessBoardRound)
+        {
+            chessBoardRound.RemoveAt(chessBoardRound.Count - 1);
+            return (chessBoardRound.LastOrDefault().chessBoard, chessBoardRound.LastOrDefault().turn);
+        }
+
+
     }
 
 
