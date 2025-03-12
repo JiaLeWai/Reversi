@@ -3,6 +3,8 @@
 #undef DEBUG
 #define DEBUGVALIDMOVE
 //#undef DEBUGVALIDMOVE
+//#define DEBUGUNDO
+//#undef DEBUGUNDO
 
 using System;
 using System.Collections.Generic;
@@ -11,18 +13,16 @@ using System.Text;
 using System.Threading.Tasks;
 
 
+
 namespace ConsoleApp1
 {
-    //delegate int chessBoard();
     class Program
     {
         static void Main(string[] args)
         {
             // The code provided will print ‘Hello World’ to the console.
             // Press Ctrl+F5 (or go to Debug > Start Without Debugging) to run your app.
-
-            
-
+            AlphaBeta a = new AlphaBeta();
             int size = 8; //chessBoard size
 
             int[,] chessBoard = chessBoardInitialise(size);
@@ -128,6 +128,11 @@ namespace ConsoleApp1
 
                 Console.WriteLine("ValidMove Counts: " + validMove.Count);
                 Console.WriteLine("[Row][Column]: ");
+
+#if DEBUGUNDO
+                debugUndo(chessBoardRound);
+#endif
+
                 string moveInput = Console.ReadLine();
 
                 if (moveInput.Length == 1 && moveInput == "9" && chessBoardRound.Count>1) // undo one move
@@ -519,10 +524,19 @@ namespace ConsoleApp1
         static (int[,], bool) undoMove(List<(int[,] chessBoard, bool turn)> chessBoardRound)
         {
             chessBoardRound.RemoveAt(chessBoardRound.Count - 1);
-            return (chessBoardRound.LastOrDefault().chessBoard, chessBoardRound.LastOrDefault().turn);
+            return (deepCopyBoard(chessBoardRound.LastOrDefault().chessBoard), chessBoardRound.LastOrDefault().turn);
         }
 
-
+#if DEBUGUNDO
+        static void debugUndo (List<(int[,] chessBoard, bool turn)> chessBoardRound)
+        {
+            for (int i = 0; i<chessBoardRound.Count; i++)
+            {
+                Console.WriteLine("\nChessBoardRound:" + i);
+                displayChessBoard(chessBoardRound[i].chessBoard, chessBoardRound[i].turn);
+            }
+        }
+#endif
     }
 
 
