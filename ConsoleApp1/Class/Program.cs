@@ -22,6 +22,8 @@ namespace ConsoleApp1
         {
             int size = 8; //chessBoard size
 
+            int mode = chooseMode();
+
             int[,] chessBoard = chessBoardInitialise(size);
 
             playChess(chessBoard);
@@ -530,6 +532,23 @@ namespace ConsoleApp1
             }
         }
 #endif
+
+        static int chooseMode()
+        {
+            int mode = -1;
+
+            Console.WriteLine("\nWelcome to Reversi Game. Please choose one of the game modes!\n1: Single Player \t2: MultiPlayer");
+
+            while(!(mode == 1 || mode == 2))
+            {
+                string input = Console.ReadLine();
+
+                mode = int.Parse(input);
+                Console.WriteLine("Incorrect mode, Please choose again!");
+            }
+
+            return mode;
+        }
     }
 
 
