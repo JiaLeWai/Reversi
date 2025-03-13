@@ -20,9 +20,6 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            // The code provided will print ‘Hello World’ to the console.
-            // Press Ctrl+F5 (or go to Debug > Start Without Debugging) to run your app.
-            AlphaBeta a = new AlphaBeta();
             int size = 8; //chessBoard size
 
             int[,] chessBoard = chessBoardInitialise(size);
@@ -33,10 +30,6 @@ namespace ConsoleApp1
 
             Console.ReadKey(true);
 
-
-
-
-            // Go to http://aka.ms/dotnet-get-started-console to continue learning how to build a console app! 
         }
 
         static int[,] chessBoardInitialise(int size)
@@ -175,7 +168,7 @@ namespace ConsoleApp1
             Console.WriteLine("\nGame Ends!");
         }
 
-        static int[,] chessBoardRunOne(int[,] chessBoard, int rowMove, int colMove, bool turn)
+        public static int[,] chessBoardRunOne(int[,] chessBoard, int rowMove, int colMove, bool turn)
         {
             int chessType = 0;
             if (turn) { chessType = 1; } else { chessType = 2; }
@@ -424,7 +417,7 @@ namespace ConsoleApp1
             return chessBoard;
         }
 
-        static List<(int,int)> checkAllNextMoves(int[,] chessBoard, bool turn)
+        public static List<(int,int)> checkAllNextMoves(int[,] chessBoard, bool turn)
         {
             List<(int, int)> validMoves = new List<(int, int)>();
             int size = chessBoard.GetLength(0);
@@ -506,7 +499,7 @@ namespace ConsoleApp1
             }
         }
 
-        static int[,] deepCopyBoard (int[,]chessBoard)
+        public static int[,] deepCopyBoard (int[,]chessBoard)
         {
             int size = chessBoard.GetLength(0);
             int [,] copy = new int[size, size];
