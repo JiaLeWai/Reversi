@@ -544,7 +544,8 @@ namespace ConsoleApp1
                 string input = Console.ReadLine();
 
                 mode = int.Parse(input);
-                Console.WriteLine("Incorrect mode, Please choose again!");
+                if(!(mode == 1 || mode == 2))
+                    Console.WriteLine("Incorrect mode, Please choose again!");
             }
 
             return mode;
