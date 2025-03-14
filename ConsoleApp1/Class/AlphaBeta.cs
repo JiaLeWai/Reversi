@@ -12,15 +12,32 @@ namespace ConsoleApp1
         private bool turn;
         private (int, int) bestMove;
         private int searchDepth;
+
+        public int ChessType { get => chessType; set => chessType = value; }
+        public bool Turn { get => turn; set => turn = value; }
         //private int depth, alpha, beta;
         public AlphaBeta(int chessTypeAssign, int depth)
         {
-            chessType = chessTypeAssign;
-            turn = (chessType == 1) ? true : false;
-            searchDepth = depth;
+            ChessType = chessTypeAssign;
+            turn = (ChessType == 1) ? true : false;
+
+            if (depth == 1)
+            {
+                searchDepth = 1;
+            }
+            else if (depth == 2)
+            {
+                searchDepth = 3;
+            }
+            else if (depth == 3)
+            {
+                searchDepth = 5;
+            }
         }
 
-        public (int,int) runAlphaBeta(int[,] chessBoard)
+
+
+        public (int, int) runAlphaBeta(int[,] chessBoard)
         {
             bestMove = (-1, -1);
             _ = alphaBeta(chessBoard, searchDepth, int.MinValue, int.MaxValue, true);
@@ -28,7 +45,7 @@ namespace ConsoleApp1
         }
 
 
-        public int alphaBeta(int [,] chessBoard, int depth, int alpha, int beta, bool isMaxPlayer)
+        public int alphaBeta(int[,] chessBoard, int depth, int alpha, int beta, bool isMaxPlayer)
         {
             if (depth == 0)
                 return (evaluateBoard(chessBoard));
@@ -45,7 +62,7 @@ namespace ConsoleApp1
 
                 if (isMaxPlayer)
                 {
-                    if(value > bestValue)
+                    if (value > bestValue)
                     {
                         bestValue = value;
                         bestMove = (row, col);
@@ -54,7 +71,7 @@ namespace ConsoleApp1
                 }
                 else
                 {
-                    if(value<bestValue)
+                    if (value < bestValue)
                     {
                         bestValue = value;
                         bestMove = (row, col);
@@ -68,21 +85,21 @@ namespace ConsoleApp1
             return bestValue;
         }
 
-        private int evaluateBoard (int [,] chessBoard)
+        private int evaluateBoard(int[,] chessBoard)
         {
             int score = 0;
             int size = chessBoard.GetLength(0);
-            int opponent = (chessType == 1) ? 2 : 1;
+            int opponent = (ChessType == 1) ? 2 : 1;
 
-            for (int i = 0; i<size; i++)
+            for (int i = 0; i < size; i++)
             {
-                for(int j = 0; j<size; j++)
+                for (int j = 0; j < size; j++)
                 {
-                    if (chessBoard[i,j] == chessType)
+                    if (chessBoard[i, j] == ChessType)
                     {
                         score++;
                     }
-                    else if (chessBoard[i,j] == opponent)
+                    else if (chessBoard[i, j] == opponent)
                     {
                         score--;
                     }

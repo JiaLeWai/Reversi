@@ -24,11 +24,20 @@ namespace ConsoleApp1
 
             int mode = chooseMode();
 
-            int[,] chessBoard = chessBoardInitialise(size);
+            //if (mode == 1)
+            //{
+            Console.WriteLine("AI Difficulties - 1:Easy\t2: Medium\t3:Hard");
+            playWithAI(2,1);
+            //}
+            //else if (mode == 2)
+            //{
+            //    int[,] chessBoard = chessBoardInitialise(size);
 
-            playChess(chessBoard);
+            //    playMultiplayer(chessBoard);
 
-            checkTotalChess(chessBoard, true);
+            //    checkTotalChess(chessBoard, true);
+            //}
+
 
             Console.ReadKey(true);
 
@@ -87,7 +96,7 @@ namespace ConsoleApp1
             }
         }
 
-        static void playChess(int[,] chessBoard)
+        static void playMultiplayer(int[,] chessBoard)
         {
             int size = chessBoard.GetLength(0);
             int totalMove = size*size; //totalMove
@@ -549,6 +558,113 @@ namespace ConsoleApp1
             }
 
             return mode;
+        }
+
+        static (int,int) playerMove(int [,] chessBoard, bool turn, List<(int, int)> validMove, int chessBoardRound_Count)
+        {
+
+            while (true)
+            {
+                displayChessBoard(chessBoard, turn);
+
+                Console.WriteLine("ValidMove Counts: " + validMove.Count);
+                Console.WriteLine("[Row][Column]: ");
+                string moveInput = Console.ReadLine();
+
+                int rowMove = moveInput[0] - '0' - 1;
+                int colMove = moveInput[1] - '0' - 1;
+
+                if (rowMove > 0 && rowMove < 9 && colMove > 0 && colMove < 9) //check the range of the input
+                {
+                    if (!validMove.Contains((rowMove, colMove))) //check if the move is valid
+                    {
+                        Console.WriteLine("Invalid Move, Please type a new position!");
+                        continue;
+                    }
+                    else
+                    {
+                        return (rowMove, colMove);
+                    }
+                }
+                else if (moveInput.Length == 1 && moveInput == "9" && chessBoardRound_Count >1) // undo one move
+                {
+                    return (9, 9);
+                }
+
+                else
+                {
+                    Console.WriteLine("Invalid Move, Please type a new position!");
+                    continue;
+                }
+
+            }
+        }
+
+        static void playWithAI(int chessType, int AI_level)
+        {
+            AlphaBeta AI_player = new AlphaBeta(chessType, AI_level);
+            int size = 8;
+            int[,] chessBoard = chessBoardInitialise(size);
+            int totalMove = size * size;
+            int moveCount = 4;
+            int noMoveCountNum = -1;
+            bool turn = false;
+            List<(int, int)> validMove = new List<(int, int)>();
+            List<(int[,] chessBoard, bool turn)> chessBoardRound = new List<(int[,], bool)>
+            {
+                (deepCopyBoard(chessBoard), turn) //add the initial chessboard to list
+            };
+
+            while(moveCount <= totalMove)
+            {
+                int rowMove = -1, colMove = -1;
+
+                checkTotalChess(chessBoard, false);
+                validMove = checkAllNextMoves(chessBoard, turn);
+                if (validMove.Count == 0)
+                {
+                    if (moveCount == noMoveCountNum)
+                    {
+                        Console.WriteLine("\nBoth players has no valid moves. Game Ends!");
+                        break;
+                    }
+
+                    Console.WriteLine("\n" + ((turn == true) ? "White Chess" : "Black Chess") + " has not valid moves. Switching turn!");
+                    turn = !turn;
+                    noMoveCountNum = moveCount;
+                    continue;
+                }
+
+               
+                if (AI_player.Turn == turn)
+                {
+                    (rowMove, colMove) = AI_player.runAlphaBeta(Program.deepCopyBoard(chessBoard));
+                    Console.WriteLine("AIMove: " + rowMove + colMove);
+                   
+                }
+                else
+                {
+                    (rowMove, colMove) = playerMove(chessBoard, turn, validMove, chessBoardRound.Count);
+
+                    if(rowMove == 9)
+                    {
+                        (chessBoard, turn) = undoMove(chessBoardRound);
+                        moveCount--;
+                        continue;
+                    }
+
+                }
+                chessBoard = chessBoardRunOne(chessBoard, rowMove, colMove, turn);
+                //displayChessBoard(chessBoard, turn);
+                //Console.ReadKey();
+                chessBoardRound.Add((deepCopyBoard(chessBoard), !turn));
+                turn = !turn;
+                moveCount++;
+            }
+
+            Console.WriteLine("\nGame Ends!");
+            checkTotalChess(chessBoard, true);
+
         }
     }
 
