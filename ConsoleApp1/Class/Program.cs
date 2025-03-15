@@ -68,7 +68,7 @@ namespace ConsoleApp1
             return chessBoard;
         }
 
-        static void displayChessBoard(int[,] chessBoard, bool turn)
+        public static void displayChessBoard(int[,] chessBoard, bool turn)
         {
             int row = chessBoard.GetLength(0);
             int column = chessBoard.GetLength(1);
@@ -113,7 +113,7 @@ namespace ConsoleApp1
             {
                 checkTotalChess(chessBoard, false);
 
-                validMove = checkAllNextMoves(chessBoard, turn);
+                validMove = checkAllNextMoves(chessBoard, turn, true);
                 if (validMove.Count == 0)
                 {
                     if (moveCount == noMoveCountNum)
@@ -150,7 +150,7 @@ namespace ConsoleApp1
                     int rowMove = moveInput[0] - '0' - 1;
                     int colMove = moveInput[1] - '0' - 1;
 
-                    if (rowMove > 0 && rowMove < 9 && colMove > 0 && colMove < 9) //check the range of the input
+                    if (rowMove >= 0 && rowMove < 8 && colMove >= 0 && colMove < 8) //check the range of the input
                     {
                         if (!validMove.Contains((rowMove, colMove))) //check if the move is valid
                         {
@@ -428,7 +428,7 @@ namespace ConsoleApp1
             return chessBoard;
         }
 
-        public static List<(int,int)> checkAllNextMoves(int[,] chessBoard, bool turn)
+        public static List<(int,int)> checkAllNextMoves(int[,] chessBoard, bool turn, bool player)
         {
             List<(int, int)> validMoves = new List<(int, int)>();
             int size = chessBoard.GetLength(0);
@@ -450,10 +450,13 @@ namespace ConsoleApp1
             }
 
 #if DEBUGVALIDMOVE
-            Console.WriteLine("\nValidMoves: ");
-            foreach (var moves in validMoves)
+            if (player)
             {
-                Console.WriteLine("(" + (moves.Item1+1) + ", " + (moves.Item2 + 1) + ")");
+                Console.WriteLine("\nValidMoves: ");
+                foreach (var moves in validMoves)
+                {
+                    Console.WriteLine("(" + (moves.Item1 + 1) + ", " + (moves.Item2 + 1) + ")");
+                }
             }
 #else
 #endif
@@ -574,7 +577,7 @@ namespace ConsoleApp1
                 int rowMove = moveInput[0] - '0' - 1;
                 int colMove = moveInput[1] - '0' - 1;
 
-                if (rowMove > 0 && rowMove < 9 && colMove > 0 && colMove < 9) //check the range of the input
+                if (rowMove >= 0 && rowMove < 9 && colMove >= 0 && colMove < 9) //check the range of the input
                 {
                     if (!validMove.Contains((rowMove, colMove))) //check if the move is valid
                     {
@@ -620,7 +623,13 @@ namespace ConsoleApp1
                 int rowMove = -1, colMove = -1;
 
                 checkTotalChess(chessBoard, false);
-                validMove = checkAllNextMoves(chessBoard, turn);
+
+                if (AI_player.Turn == turn)
+                    validMove = checkAllNextMoves(chessBoard, turn, false);
+                else
+                    validMove = checkAllNextMoves(chessBoard, turn, true);
+
+
                 if (validMove.Count == 0)
                 {
                     if (moveCount == noMoveCountNum)
@@ -639,7 +648,7 @@ namespace ConsoleApp1
                 if (AI_player.Turn == turn)
                 {
                     (rowMove, colMove) = AI_player.runAlphaBeta(Program.deepCopyBoard(chessBoard));
-                    Console.WriteLine("AIMove: " + rowMove + colMove);
+                    Console.WriteLine("AIMove: " + (rowMove + 1) + (colMove + 1 ));
                    
                 }
                 else

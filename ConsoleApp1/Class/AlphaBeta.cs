@@ -12,26 +12,41 @@ namespace ConsoleApp1
         private bool turn;
         private (int, int) bestMove;
         private int searchDepth;
+        private int[,] weightedBoard =
+        {
+            { 100, -20, 10, 5, 5, 10, -20, 100 },
+            { -20, -50,  -2, -2, -2,  -2, -50, -20 },
+            {  10,  -2,   1,  1,  1,   1,  -2,  10 },
+            { 5,  -2,   1,  0,  0,   1,  -2,   5 },
+            { 5,  -2,   1,  0,  0,   1,  -2,   5 },
+            { 10,  -2,   1,  1,  1,   1,  -2,  10 },
+            { -20, -50,  -2, -2, -2,  -2, -50, -20 },
+            { 100, -20,  10,  5,  5,  10, -20, 100 }
+        };
+        private int difficulty;
 
         public int ChessType { get => chessType; set => chessType = value; }
         public bool Turn { get => turn; set => turn = value; }
         //private int depth, alpha, beta;
-        public AlphaBeta(int chessTypeAssign, int depth)
+        public AlphaBeta(int chessTypeAssign, int AI_level)
         {
             ChessType = chessTypeAssign;
             turn = (ChessType == 1) ? true : false;
+            difficulty = AI_level;
 
-            if (depth == 1)
+            Random randomDepth = new Random();
+
+            if (AI_level == 1)
             {
-                searchDepth = 1;
+                searchDepth = randomDepth.Next(1, 3);
             }
-            else if (depth == 2)
+            else if (AI_level == 2)
             {
-                searchDepth = 3;
+                searchDepth = randomDepth.Next(3, 5);
             }
-            else if (depth == 3)
+            else if (AI_level == 3)
             {
-                searchDepth = 5;
+                searchDepth = randomDepth.Next(5, 32);
             }
         }
 
@@ -40,6 +55,7 @@ namespace ConsoleApp1
         public (int, int) runAlphaBeta(int[,] chessBoard)
         {
             bestMove = (-1, -1);
+            Program.displayChessBoard(chessBoard, turn);
             _ = alphaBeta(chessBoard, searchDepth, int.MinValue, int.MaxValue, true);
             return bestMove;
         }
@@ -47,21 +63,25 @@ namespace ConsoleApp1
 
         public int alphaBeta(int[,] chessBoard, int depth, int alpha, int beta, bool isMaxPlayer)
         {
+            Random mistakePercentage = new Random();
+
             if (depth == 0)
                 return (evaluateBoard(chessBoard));
 
             int bestValue = isMaxPlayer ? int.MinValue : int.MaxValue;
+            List<(int, int)> moves = Program.checkAllNextMoves(chessBoard, turn, false);
 
-            foreach (var move in Program.checkAllNextMoves(chessBoard, turn))
+            foreach (var move in moves)
             {
                 int row = move.Item1;
                 int col = move.Item2;
-
-                int[,] newBoard = Program.deepCopyBoard(Program.chessBoardRunOne(chessBoard, row, col, turn));
-                int value = alphaBeta(newBoard, depth - 1, alpha, beta, !isMaxPlayer);
+               
 
                 if (isMaxPlayer)
                 {
+                    int[,] newBoard = Program.deepCopyBoard(Program.chessBoardRunOne(chessBoard, row, col, turn));
+                    int value = alphaBeta(newBoard, depth - 1, alpha, beta, !isMaxPlayer);
+
                     if (value > bestValue)
                     {
                         bestValue = value;
@@ -71,6 +91,9 @@ namespace ConsoleApp1
                 }
                 else
                 {
+                    int[,] newBoard = Program.deepCopyBoard(Program.chessBoardRunOne(chessBoard, row, col, !turn));
+                    int value = alphaBeta(newBoard, depth - 1, alpha, beta, !isMaxPlayer);
+
                     if (value < bestValue)
                     {
                         bestValue = value;
@@ -81,7 +104,11 @@ namespace ConsoleApp1
 
                 if (beta <= alpha) break;
             }
-
+            
+            if ((difficulty == 1 && mistakePercentage.NextDouble() < 0.45) || (difficulty == 2 && mistakePercentage.NextDouble() < 0.2))
+            {
+                bestMove = moves[mistakePercentage.Next(moves.Count-1)];
+            }
             return bestValue;
         }
 
@@ -89,19 +116,19 @@ namespace ConsoleApp1
         {
             int score = 0;
             int size = chessBoard.GetLength(0);
-            int opponent = (ChessType == 1) ? 2 : 1;
+            int opponent = (chessType == 1) ? 2 : 1;
 
             for (int i = 0; i < size; i++)
             {
                 for (int j = 0; j < size; j++)
                 {
-                    if (chessBoard[i, j] == ChessType)
+                    if (chessBoard[i, j] == chessType)
                     {
-                        score++;
+                        score += weightedBoard[i,j];
                     }
                     else if (chessBoard[i, j] == opponent)
                     {
-                        score--;
+                        score -= weightedBoard[i,j];
                     }
                 }
             }
