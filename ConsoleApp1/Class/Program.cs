@@ -27,7 +27,7 @@ namespace ConsoleApp1
             //if (mode == 1)
             //{
             Console.WriteLine("AI Difficulties - 1:Easy\t2: Medium\t3:Hard");
-            playWithAI(2,1);
+            playWithAI(2,3);
             //}
             //else if (mode == 2)
             //{

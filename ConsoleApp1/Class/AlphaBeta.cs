@@ -46,7 +46,8 @@ namespace ConsoleApp1
             }
             else if (AI_level == 3)
             {
-                searchDepth = randomDepth.Next(5, 32);
+                // searchDepth = randomDepth.Next(5, 11);
+                searchDepth = 7;
             }
         }
 
@@ -57,6 +58,11 @@ namespace ConsoleApp1
             bestMove = (-1, -1);
             Program.displayChessBoard(chessBoard, turn);
             _ = alphaBeta(chessBoard, searchDepth, int.MinValue, int.MaxValue, true);
+
+            if(bestMove == (-1, -1))
+            {
+                throw new ArgumentException("AI_Agent has some errors, rematch!");
+            }
             return bestMove;
         }
 
@@ -64,6 +70,7 @@ namespace ConsoleApp1
         public int alphaBeta(int[,] chessBoard, int depth, int alpha, int beta, bool isMaxPlayer)
         {
             Random mistakePercentage = new Random();
+            bool gameOver = false;
 
             if (depth == 0)
                 return (evaluateBoard(chessBoard));
@@ -73,6 +80,10 @@ namespace ConsoleApp1
 
             if (moves.Count == 0) // if there is no move for anyone in calculations
             {
+                gameOver = (turn ? checkOpponentValidMoves(chessBoard, !turn) : checkOpponentValidMoves(chessBoard, turn));
+                if (gameOver) // check if opponent has no moves
+                    return evaluateBoard(chessBoard);
+
                 if (isMaxPlayer)
                 {
                     int value = alphaBeta(chessBoard, depth - 1, alpha, beta, !isMaxPlayer);
@@ -80,7 +91,6 @@ namespace ConsoleApp1
                     {
                         bestValue = value;
                     }
-                   // alpha = Math.Max(alpha, value);
                 }
                 else
                 {
@@ -90,12 +100,9 @@ namespace ConsoleApp1
                     {
                         bestValue = value;
                     }
-                   // beta = Math.Min(beta, value);
                 }
 
                 return bestValue;
-                
-
             }
             else
             {
@@ -113,7 +120,10 @@ namespace ConsoleApp1
                         if (value > bestValue)
                         {
                             bestValue = value;
-                            bestMove = (row, col);
+                            if(depth == searchDepth)
+                            {
+                                bestMove = (row, col);
+                            }
                         }
                         alpha = Math.Max(alpha, value);
                     }
@@ -125,10 +135,10 @@ namespace ConsoleApp1
                         if (value < bestValue)
                         {
                             bestValue = value;
-                            bestMove = (row, col);
                         }
                         beta = Math.Min(beta, value); //comparing with value and both value are the same implementation
                     }
+
 
                     if (beta <= alpha) break;
                 }
@@ -162,6 +172,14 @@ namespace ConsoleApp1
                 }
             }
             return score;
+        }
+
+        private bool checkOpponentValidMoves(int[,] chessBoard, bool turn)
+        {
+            if (Program.checkAllNextMoves(chessBoard, turn, false).Count == 0)
+                return true;
+            else
+                return false;
         }
 
 
