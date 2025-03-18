@@ -20,23 +20,24 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            int size = 8; //chessBoard size
+            int size = 8;
+            int AI_chessType = -1;
+            int AI_level = -1;
+    
+            int mode = chooseMode(out AI_level, out AI_chessType);
 
-            int mode = chooseMode();
+            if (mode == 1)
+            {   
+                playWithAI(AI_level, AI_chessType);
+            }
+            else if (mode == 2)
+            {
+                int[,] chessBoard = chessBoardInitialise(size);
 
-            //if (mode == 1)
-            //{
-            Console.WriteLine("AI Difficulties - 1:Easy\t2: Medium\t3:Hard");
-            playWithAI(2,1);
-            //}
-            //else if (mode == 2)
-            //{
-            //    int[,] chessBoard = chessBoardInitialise(size);
+                playMultiplayer(chessBoard);
 
-            //    playMultiplayer(chessBoard);
-
-            //    checkTotalChess(chessBoard, true);
-            //}
+                checkTotalChess(chessBoard, true);
+            }
 
 
             Console.ReadKey(true);
@@ -545,7 +546,7 @@ namespace ConsoleApp1
         }
 #endif
 
-        static int chooseMode()
+        static int chooseMode(out int level, out int AI_chessType)
         {
             int mode = -1;
 
@@ -560,7 +561,52 @@ namespace ConsoleApp1
                     Console.WriteLine("Incorrect mode, Please choose again!");
             }
 
+            if (mode == 1)
+            {
+                (level, AI_chessType) = chooseAILevel();
+            }
+
+            else
+            {
+                level = -1;
+                AI_chessType = -1;
+            }
+
             return mode;
+        }
+
+        static (int, int) chooseAILevel()
+        {
+            int level = -1, AI_chessType = -1;
+
+            while (level == -1 || AI_chessType == -1)
+            {
+                Console.WriteLine("AI Difficulties - 1:Easy\t2: Medium\t3:Hard");
+
+                string input_level = Console.ReadLine();
+
+                int AI_level = int.Parse(input_level);
+                if (!(AI_level >= 1 || AI_level <= 3))
+                    Console.WriteLine("Incorrect input, Please choose the AI_difficulties again!");
+                else
+                {
+                    level = AI_level;
+                }
+
+                Console.WriteLine("Which chess do you want - 1:White(Move After)\t2: Black");
+                string input_chessType = Console.ReadLine();
+                int player_chessType = int.Parse(input_chessType);
+                if (!(player_chessType >= 1 || player_chessType <= 2))
+                {
+                    Console.WriteLine("Incorrect input, Please choose the chess type again!");
+                }
+                else
+                {
+                    AI_chessType = (player_chessType == 1) ? 2 : 1;
+                }
+
+            }
+            return (level, AI_chessType);
         }
 
         static (int,int) playerMove(int [,] chessBoard, bool turn, List<(int, int)> validMove, int chessBoardRound_Count)
@@ -603,9 +649,10 @@ namespace ConsoleApp1
             }
         }
 
-        static void playWithAI(int chessType, int AI_level)
+        static void playWithAI(int AI_level, int chessType)
         {
             AlphaBeta AI_player = new AlphaBeta(chessType, AI_level);
+
             int size = 8;
             int[,] chessBoard = chessBoardInitialise(size);
             int totalMove = size * size;

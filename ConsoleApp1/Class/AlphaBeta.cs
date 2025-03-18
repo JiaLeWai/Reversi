@@ -46,7 +46,8 @@ namespace ConsoleApp1
             }
             else if (AI_level == 3)
             {
-                searchDepth = randomDepth.Next(5, 32);
+                // searchDepth = randomDepth.Next(5, 11);
+                searchDepth = 7;
             }
         }
 
@@ -57,6 +58,11 @@ namespace ConsoleApp1
             bestMove = (-1, -1);
             Program.displayChessBoard(chessBoard, turn);
             _ = alphaBeta(chessBoard, searchDepth, int.MinValue, int.MaxValue, true);
+
+            if(bestMove == (-1, -1))
+            {
+                throw new ArgumentException("AI_Agent has some errors, rematch!");
+            }
             return bestMove;
         }
 
@@ -64,6 +70,7 @@ namespace ConsoleApp1
         public int alphaBeta(int[,] chessBoard, int depth, int alpha, int beta, bool isMaxPlayer)
         {
             Random mistakePercentage = new Random();
+            bool gameOver = false;
 
             if (depth == 0)
                 return (evaluateBoard(chessBoard));
@@ -71,43 +78,75 @@ namespace ConsoleApp1
             int bestValue = isMaxPlayer ? int.MinValue : int.MaxValue;
             List<(int, int)> moves = Program.checkAllNextMoves(chessBoard, turn, false);
 
-            foreach (var move in moves)
+            if (moves.Count == 0) // if there is no move for anyone in calculations
             {
-                int row = move.Item1;
-                int col = move.Item2;
-               
+                gameOver = (turn ? checkOpponentValidMoves(chessBoard, !turn) : checkOpponentValidMoves(chessBoard, turn));
+                if (gameOver) // check if opponent has no moves
+                    return evaluateBoard(chessBoard);
 
                 if (isMaxPlayer)
                 {
-                    int[,] newBoard = Program.deepCopyBoard(Program.chessBoardRunOne(chessBoard, row, col, turn));
-                    int value = alphaBeta(newBoard, depth - 1, alpha, beta, !isMaxPlayer);
-
+                    int value = alphaBeta(chessBoard, depth - 1, alpha, beta, !isMaxPlayer);
                     if (value > bestValue)
                     {
                         bestValue = value;
-                        bestMove = (row, col);
                     }
-                    alpha = Math.Max(alpha, value);
                 }
                 else
                 {
-                    int[,] newBoard = Program.deepCopyBoard(Program.chessBoardRunOne(chessBoard, row, col, !turn));
-                    int value = alphaBeta(newBoard, depth - 1, alpha, beta, !isMaxPlayer);
+                    int value = alphaBeta(chessBoard, depth - 1, alpha, beta, !isMaxPlayer);
 
                     if (value < bestValue)
                     {
                         bestValue = value;
-                        bestMove = (row, col);
                     }
-                    beta = Math.Min(beta, value); //comparing with value and both value are the same implementation
                 }
 
-                if (beta <= alpha) break;
+                return bestValue;
             }
-            
-            if ((difficulty == 1 && mistakePercentage.NextDouble() < 0.45) || (difficulty == 2 && mistakePercentage.NextDouble() < 0.2))
+            else
             {
-                bestMove = moves[mistakePercentage.Next(moves.Count-1)];
+                foreach (var move in moves)
+                {
+                    int row = move.Item1;
+                    int col = move.Item2;
+
+
+                    if (isMaxPlayer)
+                    {
+                        int[,] newBoard = Program.deepCopyBoard(Program.chessBoardRunOne(chessBoard, row, col, turn));
+                        int value = alphaBeta(newBoard, depth - 1, alpha, beta, !isMaxPlayer);
+
+                        if (value > bestValue)
+                        {
+                            bestValue = value;
+                            if(depth == searchDepth)
+                            {
+                                bestMove = (row, col);
+                            }
+                        }
+                        alpha = Math.Max(alpha, value);
+                    }
+                    else
+                    {
+                        int[,] newBoard = Program.deepCopyBoard(Program.chessBoardRunOne(chessBoard, row, col, !turn));
+                        int value = alphaBeta(newBoard, depth - 1, alpha, beta, !isMaxPlayer);
+
+                        if (value < bestValue)
+                        {
+                            bestValue = value;
+                        }
+                        beta = Math.Min(beta, value); //comparing with value and both value are the same implementation
+                    }
+
+
+                    if (beta <= alpha) break;
+                }
+
+                if ((difficulty == 1 && mistakePercentage.NextDouble() < 0.45) || (difficulty == 2 && mistakePercentage.NextDouble() < 0.2))
+                {
+                    bestMove = moves[mistakePercentage.Next(moves.Count - 1)];
+                }
             }
             return bestValue;
         }
@@ -133,6 +172,14 @@ namespace ConsoleApp1
                 }
             }
             return score;
+        }
+
+        private bool checkOpponentValidMoves(int[,] chessBoard, bool turn)
+        {
+            if (Program.checkAllNextMoves(chessBoard, turn, false).Count == 0)
+                return true;
+            else
+                return false;
         }
 
 
